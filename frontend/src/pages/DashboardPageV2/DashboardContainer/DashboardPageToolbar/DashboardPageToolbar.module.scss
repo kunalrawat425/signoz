@@ -5,7 +5,11 @@
 	color: var(--l2-foreground);
 	background-color: var(--l1-background);
 	padding: 16px;
-	box-shadow: 0 2px 2px 0px var(--l2-border);
+	/* Crisp hairline + a soft, barely-there depth fade — both token-based so the
+	   sticky toolbar separates from the panels without the old fuzzy smudge. */
+	box-shadow:
+		0 1px 0 0 var(--l2-border),
+		0 6px 12px -10px var(--l2-border);
 }
 
 .dashboardPageToolbarSubContainer {
@@ -16,5 +20,27 @@
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
+	gap: 16px;
 	width: 100%;
+}
+
+/* Plain block (NOT flex / no `overflow`, which would establish a BFC and stop
+   the float wrap): the time selector floats top-right and the variables bar
+   flows beside it, collapsing to one line by default and — when expanded —
+   wrapping onto full-width lines that run underneath the time selector.
+   The clearfix keeps the row tall enough for the floated cluster. */
+.toolbarRow2 {
+	width: 100%;
+	margin-top: 12px;
+
+	&::after {
+		display: block;
+		clear: both;
+		content: '';
+	}
+}
+
+.timeCluster {
+	float: right;
+	margin: 0 0 8px 16px;
 }

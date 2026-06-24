@@ -1,12 +1,95 @@
 /* Mirrors the V1 dashboard variable bar: each variable is a connected pill —
    a robin `$name` segment joined to a value segment. */
-/* Sits inside the already-padded sticky toolbar section, so it only needs a top
-   gap from the tags — horizontal/bottom padding comes from the toolbar. */
+
+/* Full-width block flowing after the floated time selector. Not a BFC, so its
+   inline content wraps around the float and continues full-width below it. */
 .bar {
+	min-width: 0;
+}
+
+/* Collapsed: `display: flow-root` makes the strip a BFC (so it shrinks to the
+   space left of the floated time selector) WITHOUT clipping — `overflow: hidden`
+   would crop the select dropdown, which renders inside the strip. The inline
+   pills sit on one line; overflow ones are `display: none` (kept mounted), so
+   the +N trigger hugs the last visible pill. */
+.strip {
+	display: flow-root;
+}
+
+/* Expanded: clear the floated time selector so the whole strip drops to a
+   full-width flex-wrap block beneath it — the pills pack tightly across the
+   line instead of stair-stepping beside the tall float. `gap` gives the same
+   8px between pills (and between rows) as the collapsed line. */
+.stripExpanded {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12px;
+	gap: 8px;
+	/* Separate the wrapped pills from the time-selector row above. `margin-top`
+	   would be swallowed by the float clearance, so use padding instead. */
 	padding-top: 12px;
+	overflow: visible;
+	clear: both;
+
+	/* gap owns the spacing here, so drop the inline-flow margins. */
+	.variableSlot,
+	.moreButton {
+		margin: 0;
+	}
+
+	/* No `fill-mode` (and `to` matches the resting state), so no `transform`
+	   lingers — a non-none transform would make this a containing block and
+	   offset the select dropdown that renders inside it. */
+	@media (prefers-reduced-motion: no-preference) {
+		animation: variablesExpandIn 200ms ease-out;
+	}
+}
+
+@keyframes variablesExpandIn {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.variableSlot {
+	display: inline-flex;
+	align-items: center;
+	margin-right: 8px;
+	vertical-align: top;
+}
+
+/* Removed from layout but kept mounted (auto-selection / option fetch survive). */
+.variableSlotHidden {
+	display: none;
+}
+
+/* Inline pill that follows the last visible variable. */
+.moreButton {
+	display: inline-flex;
+	height: 32px;
+	align-items: center;
+	gap: 2px;
+	padding: 0 10px;
+	border: 1px solid var(--l3-border);
+	border-radius: 2px;
+	background: var(--l2-background);
+	color: var(--l2-foreground);
+	font-family: Inter;
+	font-size: 12px;
+	font-weight: 500;
+	white-space: nowrap;
+	vertical-align: top;
+	cursor: pointer;
+
+	&:hover {
+		border-color: var(--bg-robin-400);
+		color: var(--l1-foreground);
+	}
 }
 
 .variableItem {
@@ -21,7 +104,7 @@
 	align-items: center;
 	gap: 4px;
 	padding: 6px 6px 6px 8px;
-	border: 1px solid var(--l1-border);
+	border: 1px solid var(--l3-border);
 	border-radius: 2px 0 0 2px;
 	background: var(--l3-background);
 	color: var(--bg-robin-300);
@@ -32,9 +115,13 @@
 	white-space: nowrap;
 }
 
+/* Inline so it stays on the name line; `vertical-align: middle` centres it with
+   the name text (and so with the value input beside it). */
 .infoIcon {
-	margin-left: 4px;
+	display: inline-flex;
+	margin-left: 2px;
 	color: var(--l2-foreground);
+	vertical-align: middle;
 }
 
 .variableValue {
@@ -42,7 +129,7 @@
 	min-width: 120px;
 	height: 32px;
 	align-items: center;
-	border: 1px solid var(--l1-border);
+	border: 1px solid var(--l3-border);
 	border-left: none;
 	border-radius: 0 2px 2px 0;
 	background: var(--l2-background);
